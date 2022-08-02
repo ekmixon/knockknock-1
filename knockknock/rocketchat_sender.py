@@ -68,16 +68,18 @@ def rocketchat_sender(rocketchat_server_url: str,
             # Except for errors, only the master process will send notifications.
             if "RANK" in os.environ:
                 master_process = (int(os.environ["RANK"]) == 0)
-                host_name += " - RANK: %s" % os.environ["RANK"]
+                host_name += f' - RANK: {os.environ["RANK"]}'
             else:
                 master_process = True
 
             if master_process:
-                contents = ["Your training has **started** :clap: %s" % " ".join(["@" + u for u in user_mentions]),
-                            "**Machine name:** %s" % host_name,
-                            "**Main call:** %s" % func_name,
-                            "**Starting date:** %s" % start_time.strftime(
-                                DATE_FORMAT)]
+                contents = [
+                    f'Your training has **started** :clap: {" ".join([f"@{u}" for u in user_mentions])}',
+                    f"**Machine name:** {host_name}",
+                    f"**Main call:** {func_name}",
+                    "**Starting date:** %s" % start_time.strftime(DATE_FORMAT),
+                ]
+
                 dump["text"] = "\n".join(contents)
                 requests.post(
                     url=webhook_url,
@@ -90,19 +92,20 @@ def rocketchat_sender(rocketchat_server_url: str,
                 if master_process:
                     end_time = datetime.datetime.now().replace(microsecond=0)
                     elapsed_time = (end_time - start_time)
-                    contents = ["Your training is **complete** :tada: %s" % " ".join(["@" + u for u in user_mentions]),
-                                "**Machine name:** %s" % host_name,
-                                "**Main call:** %s" % func_name,
-                                "**Starting date:** %s" % start_time.strftime(
-                                    DATE_FORMAT),
-                                "**End date:** %s" % end_time.strftime(
-                                    DATE_FORMAT),
-                                "**Training duration:** %s" % str(elapsed_time)]
+                    contents = [
+                        f'Your training is **complete** :tada: {" ".join([f"@{u}" for u in user_mentions])}',
+                        f"**Machine name:** {host_name}",
+                        f"**Main call:** {func_name}",
+                        "**Starting date:** %s"
+                        % start_time.strftime(DATE_FORMAT),
+                        "**End date:** %s" % end_time.strftime(DATE_FORMAT),
+                        f"**Training duration:** {str(elapsed_time)}",
+                    ]
+
 
                     try:
                         str_value = str(value)
-                        contents.append(
-                            "**Main call returned value:** %s" % str_value)
+                        contents.append(f"**Main call returned value:** {str_value}")
                     except:
                         contents.append("**Main call returned value:** %s" %
                                         "ERROR - Couldn't str the returned value.")
@@ -118,19 +121,19 @@ def rocketchat_sender(rocketchat_server_url: str,
             except Exception as ex:
                 end_time = datetime.datetime.now().replace(microsecond=0)
                 elapsed_time = end_time - start_time
-                contents = ["Your training has **crashed** :skull_crossbones: %s" % " ".join(["@" + u for u in user_mentions]),
-                            "**Machine name:** %s" % host_name,
-                            "**Main call:** %s" % func_name,
-                            "**Starting date:** %s" % start_time.strftime(
-                                DATE_FORMAT),
-                            "**Crash date:** %s" % end_time.strftime(
-                                DATE_FORMAT),
-                            "**Crashed training duration:** %s" % str(
-                                elapsed_time),
-                            "**Error message:**",
-                            "\n%s\n" % ex,
-                            "**Traceback:**",
-                            "\n%s\n" % traceback.format_exc()]
+                contents = [
+                    f'Your training has **crashed** :skull_crossbones: {" ".join([f"@{u}" for u in user_mentions])}',
+                    f"**Machine name:** {host_name}",
+                    f"**Main call:** {func_name}",
+                    "**Starting date:** %s" % start_time.strftime(DATE_FORMAT),
+                    "**Crash date:** %s" % end_time.strftime(DATE_FORMAT),
+                    "**Crashed training duration:** %s" % str(elapsed_time),
+                    "**Error message:**",
+                    "\n%s\n" % ex,
+                    "**Traceback:**",
+                    "\n%s\n" % traceback.format_exc(),
+                ]
+
                 dump["text"] = "\n".join(contents)
                 requests.post(
                     url=webhook_url,

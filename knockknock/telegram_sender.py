@@ -39,15 +39,18 @@ def telegram_sender(token: str, chat_id: int):
             # Except for errors, only the master process will send notifications.
             if 'RANK' in os.environ:
                 master_process = (int(os.environ['RANK']) == 0)
-                host_name += ' - RANK: %s' % os.environ['RANK']
+                host_name += f" - RANK: {os.environ['RANK']}"
             else:
                 master_process = True
 
             if master_process:
-                contents = ['Your training has started 🎬',
-                            'Machine name: %s' % host_name,
-                            'Main call: %s' % func_name,
-                            'Starting date: %s' % start_time.strftime(DATE_FORMAT)]
+                contents = [
+                    'Your training has started 🎬',
+                    f'Machine name: {host_name}',
+                    f'Main call: {func_name}',
+                    f'Starting date: {start_time.strftime(DATE_FORMAT)}',
+                ]
+
                 text = '\n'.join(contents)
                 bot.send_message(chat_id=chat_id, text=text)
 
@@ -57,16 +60,19 @@ def telegram_sender(token: str, chat_id: int):
                 if master_process:
                     end_time = datetime.datetime.now()
                     elapsed_time = end_time - start_time
-                    contents = ["Your training is complete 🎉",
-                                'Machine name: %s' % host_name,
-                                'Main call: %s' % func_name,
-                                'Starting date: %s' % start_time.strftime(DATE_FORMAT),
-                                'End date: %s' % end_time.strftime(DATE_FORMAT),
-                                'Training duration: %s' % str(elapsed_time)]
+                    contents = [
+                        "Your training is complete 🎉",
+                        f'Machine name: {host_name}',
+                        f'Main call: {func_name}',
+                        f'Starting date: {start_time.strftime(DATE_FORMAT)}',
+                        f'End date: {end_time.strftime(DATE_FORMAT)}',
+                        f'Training duration: {str(elapsed_time)}',
+                    ]
+
 
                     try:
                         str_value = str(value)
-                        contents.append('Main call returned value: %s'% str_value)
+                        contents.append(f'Main call returned value: {str_value}')
                     except:
                         contents.append('Main call returned value: %s'% "ERROR - Couldn't str the returned value.")
 
@@ -78,16 +84,19 @@ def telegram_sender(token: str, chat_id: int):
             except Exception as ex:
                 end_time = datetime.datetime.now()
                 elapsed_time = end_time - start_time
-                contents = ["Your training has crashed ☠️",
-                            'Machine name: %s' % host_name,
-                            'Main call: %s' % func_name,
-                            'Starting date: %s' % start_time.strftime(DATE_FORMAT),
-                            'Crash date: %s' % end_time.strftime(DATE_FORMAT),
-                            'Crashed training duration: %s\n\n' % str(elapsed_time),
-                            "Here's the error:",
-                            '%s\n\n' % ex,
-                            "Traceback:",
-                            '%s' % traceback.format_exc()]
+                contents = [
+                    "Your training has crashed ☠️",
+                    f'Machine name: {host_name}',
+                    f'Main call: {func_name}',
+                    f'Starting date: {start_time.strftime(DATE_FORMAT)}',
+                    f'Crash date: {end_time.strftime(DATE_FORMAT)}',
+                    'Crashed training duration: %s\n\n' % str(elapsed_time),
+                    "Here's the error:",
+                    '%s\n\n' % ex,
+                    "Traceback:",
+                    f'{traceback.format_exc()}',
+                ]
+
                 text = '\n'.join(contents)
                 bot.send_message(chat_id=chat_id, text=text)
                 raise ex

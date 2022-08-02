@@ -29,7 +29,7 @@ def wechat_sender(webhook_url: str,
         Optional user's phone numbers to notify (use '@all' for all group members).
         Visit https://work.weixin.qq.com/api/doc/90000/90136/91770 for more details.
     """
-    
+
     msg_template = {
         "msgtype": "text", 
         "text": {
@@ -54,16 +54,19 @@ def wechat_sender(webhook_url: str,
             # Except for errors, only the master process will send notifications.
             if 'RANK' in os.environ:
                 master_process = (int(os.environ['RANK']) == 0)
-                host_name += ' - RANK: %s' % os.environ['RANK']
+                host_name += f" - RANK: {os.environ['RANK']}"
             else:
                 master_process = True
 
             if master_process:
-                contents = ['Your training has started 🎬',
-                            'Machine name: %s' % host_name,
-                            'Main call: %s' % func_name,
-                            'Starting date: %s' % start_time.strftime(DATE_FORMAT)]
-                
+                contents = [
+                    'Your training has started 🎬',
+                    f'Machine name: {host_name}',
+                    f'Main call: {func_name}',
+                    f'Starting date: {start_time.strftime(DATE_FORMAT)}',
+                ]
+
+
                 msg_template['text']['content'] = '\n'.join(contents)
                 requests.post(webhook_url, json=msg_template)
 
@@ -73,20 +76,23 @@ def wechat_sender(webhook_url: str,
                 if master_process:
                     end_time = datetime.datetime.now()
                     elapsed_time = end_time - start_time
-                    contents = ["Your training is complete 🎉",
-                                'Machine name: %s' % host_name,
-                                'Main call: %s' % func_name,
-                                'Starting date: %s' % start_time.strftime(DATE_FORMAT),
-                                'End date: %s' % end_time.strftime(DATE_FORMAT),
-                                'Training duration: %s' % str(elapsed_time)]
+                    contents = [
+                        "Your training is complete 🎉",
+                        f'Machine name: {host_name}',
+                        f'Main call: {func_name}',
+                        f'Starting date: {start_time.strftime(DATE_FORMAT)}',
+                        f'End date: {end_time.strftime(DATE_FORMAT)}',
+                        f'Training duration: {str(elapsed_time)}',
+                    ]
+
 
                     try:
                         str_value = str(value)
-                        contents.append('Main call returned value: %s'% str_value)
+                        contents.append(f'Main call returned value: {str_value}')
                     except:
                         contents.append('Main call returned value: %s'% "ERROR - Couldn't str the returned value.")
 
-                    
+
                     msg_template['text']['content'] = '\n'.join(contents)
                     requests.post(webhook_url, json=msg_template)
                     print(msg_template)
@@ -96,17 +102,20 @@ def wechat_sender(webhook_url: str,
             except Exception as ex:
                 end_time = datetime.datetime.now()
                 elapsed_time = end_time - start_time
-                contents = ["Your training has crashed ☠️",
-                            'Machine name: %s' % host_name,
-                            'Main call: %s' % func_name,
-                            'Starting date: %s' % start_time.strftime(DATE_FORMAT),
-                            'Crash date: %s' % end_time.strftime(DATE_FORMAT),
-                            'Crashed training duration: %s\n\n' % str(elapsed_time),
-                            "Here's the error:",
-                            '%s\n\n' % ex,
-                            "Traceback:",
-                            '%s' % traceback.format_exc()]
-                
+                contents = [
+                    "Your training has crashed ☠️",
+                    f'Machine name: {host_name}',
+                    f'Main call: {func_name}',
+                    f'Starting date: {start_time.strftime(DATE_FORMAT)}',
+                    f'Crash date: {end_time.strftime(DATE_FORMAT)}',
+                    'Crashed training duration: %s\n\n' % str(elapsed_time),
+                    "Here's the error:",
+                    '%s\n\n' % ex,
+                    "Traceback:",
+                    f'{traceback.format_exc()}',
+                ]
+
+
                 msg_template['text']['content'] = '\n'.join(contents)
                 requests.post(webhook_url, json=msg_template)
                 print(msg_template)
